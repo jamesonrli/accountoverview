@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.jamesonli.accountview.ui.base.BalanceInputActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/input_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/new_balance_toolbar_text"
+        app:titleTextColor="@android:color/white"
+        style="@style/AppInputToolbar" />
+
+    <FrameLayout
+        android:id="@+id/form_full_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/input_toolbar"/>
+
+</RelativeLayout>
