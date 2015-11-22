@@ -6,6 +6,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 /**
@@ -19,6 +20,7 @@ public class NetworkManager {
 
     public static int POST = Request.Method.POST;
     public static String USERS = "users";
+    public static String BALANCES = "balances";
 
     private RequestQueue requestQueue;
 
@@ -43,10 +45,21 @@ public class NetworkManager {
         requestQueue.add(request);
     }
 
-    public void newRequest(int method, String resource, String requestBody, Response.Listener responseListener, Response.ErrorListener errorListener) {
+    /**
+     * Request with JSON
+     */
+    public void newJsonRequest(int method, String resource, String requestBody, Response.Listener responseListener, Response.ErrorListener errorListener) {
         JsonRequest jsonRequest = new JsonObjectRequest(
                 method, String.format("%s/%s", INTERNAL_URL, resource), requestBody, responseListener, errorListener);
         addRequest(jsonRequest);
+    }
+
+    /**
+     * Get Request
+     */
+    public void newStringRequest(String resource, String params, Response.Listener responseListener, Response.ErrorListener errorListener) {
+        StringRequest stringRequest = new StringRequest(String.format("%s/%s/%s", INTERNAL_URL, resource, params), responseListener, errorListener);
+        addRequest(stringRequest);
     }
 
 }

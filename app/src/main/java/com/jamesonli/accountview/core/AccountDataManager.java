@@ -68,11 +68,11 @@ public class AccountDataManager {
     }
 
     private void loginRequest(JSONObject userObj, final AuthListener listener) {
-        NetworkManager.getInstance(mContext).newRequest(NetworkManager.POST, NetworkManager.USERS, userObj.toString(),
+        NetworkManager.getInstance(mContext).newJsonRequest(NetworkManager.POST, NetworkManager.USERS, userObj.toString(),
                 new Response.Listener() {
                     @Override
                     public void onResponse(Object response) {
-                        if(response instanceof JSONObject) {
+                        if (response instanceof JSONObject) {
                             JSONObject responseObj = (JSONObject) response;
                             try {
                                 persistUserId(responseObj.getString("id"));
@@ -109,8 +109,41 @@ public class AccountDataManager {
                 listener.onComplete();
             }
         };
-
         mAccountManagerExecutor.execute(dbTask);
+
+        String deviceId = AVUtils.getDeviceId(mContext);
+
+        try {
+            JSONObject balanceDetails = new JSONObject();
+            balanceDetails.put("deviceid", deviceId);
+            balanceDetails.put("datetime", date.getTime());
+            balanceDetails.put("balance", balance);
+            JSONObject balanceObj = new JSONObject();
+            balanceObj.put("balance", balanceDetails);
+
+            addBalanceRequest(balanceObj);
+        } catch (JSONException e) {
+            LOG.error("failed to create json obj: " + e.getMessage());
+        }
+
+
+    }
+
+    private void addBalanceRequest(JSONObject balanceObj) {
+        NetworkManager.getInstance(mContext).newJsonRequest(NetworkManager.POST, NetworkManager.BALANCES, balanceObj.toString(),
+                new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+                        LOG.info("new balance sent");
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        LOG.error("new balance error: " + error.getMessage());
+                    }
+                }
+        );
     }
 
     public void getBalanceEntries(final AccountDataListener listener) {
