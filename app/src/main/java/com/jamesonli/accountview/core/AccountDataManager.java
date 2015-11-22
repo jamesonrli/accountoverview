@@ -45,10 +45,14 @@ public class AccountDataManager {
         mContext = context;
     }
 
+    public boolean isLoggedIn() {
+        return SharedPreferencesManager.getInstance(mContext).valueExists(SharedPreferencesManager.USER_ID);
+    }
+
     /**
      * Get device id, make login request, and store user id
      */
-    public void login() {
+    public void login(AuthListener listener) {
         String deviceId = AVUtils.getDeviceId(mContext);
 
         JSONObject userObj = new JSONObject();
@@ -57,14 +61,14 @@ public class AccountDataManager {
             deviceObj.put("deviceid", deviceId);
             userObj.put("user", deviceObj);
 
-            loginRequest(userObj);
+            loginRequest(userObj, listener);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void loginRequest(JSONObject userObj) {
-        NetworkManager.getInstance(mContext).newRequest(NetworkManager.POST, userObj.toString(),
+    private void loginRequest(JSONObject userObj, final AuthListener listener) {
+        NetworkManager.getInstance(mContext).newRequest(NetworkManager.POST, NetworkManager.USERS, userObj.toString(),
                 new Response.Listener() {
                     @Override
                     public void onResponse(Object response) {
@@ -72,6 +76,7 @@ public class AccountDataManager {
                             JSONObject responseObj = (JSONObject) response;
                             try {
                                 persistUserId(responseObj.getString("id"));
+                                listener.onLoginSuccess();
                             } catch (JSONException e) {
                                 LOG.error("failed to parse response json: " + e.getMessage());
                             }
@@ -81,7 +86,7 @@ public class AccountDataManager {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        LOG.error("network error: " + error.toString());
+                        LOG.error("network error: " + error.getMessage());
                     }
                 }
         );

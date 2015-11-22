@@ -2,4 +2,6 @@
 <resources>
     <color name="av_blue">#0D3866</color>
     <color name="fab_green">#45A018</color>
+
+    <color name="full_screen_dialog_background">#66FFFFFF</color>
 </resources>

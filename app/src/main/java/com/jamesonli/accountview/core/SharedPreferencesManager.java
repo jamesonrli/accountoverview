@@ -38,4 +38,8 @@ public class SharedPreferencesManager {
         editor.putString(key, value);
         editor.commit();
     }
+
+    public boolean valueExists(String key) {
+        return mSharedPreferences.contains(key);
+    }
 }

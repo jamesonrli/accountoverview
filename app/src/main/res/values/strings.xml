@@ -12,4 +12,5 @@
     <string name="graph_balance_label">balance</string>
     <string name="new_balance_toolbar_text">New Balance</string>
     <string name="balance_summary_label_text">Balance:</string>
+    <string name="login_button_text">Login</string>
 </resources>

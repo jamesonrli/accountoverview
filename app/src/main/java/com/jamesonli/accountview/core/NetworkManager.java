@@ -15,9 +15,10 @@ public class NetworkManager {
 
     private static String INTERNAL_HOST = "10.0.1.20";
     private static String INTERNAL_PORT = "3000";
-    private static String INTERNAL_URL = String.format("https://%s:%s", INTERNAL_HOST, INTERNAL_PORT);
+    private static String INTERNAL_URL = String.format("http://%s:%s", INTERNAL_HOST, INTERNAL_PORT);
 
     public static int POST = Request.Method.POST;
+    public static String USERS = "users";
 
     private RequestQueue requestQueue;
 
@@ -42,8 +43,9 @@ public class NetworkManager {
         requestQueue.add(request);
     }
 
-    public void newRequest(int method, String requestBody, Response.Listener responseListener, Response.ErrorListener errorListener) {
-        JsonRequest jsonRequest = new JsonObjectRequest(method, INTERNAL_URL, requestBody, responseListener, errorListener);
+    public void newRequest(int method, String resource, String requestBody, Response.Listener responseListener, Response.ErrorListener errorListener) {
+        JsonRequest jsonRequest = new JsonObjectRequest(
+                method, String.format("%s/%s", INTERNAL_URL, resource), requestBody, responseListener, errorListener);
         addRequest(jsonRequest);
     }
 

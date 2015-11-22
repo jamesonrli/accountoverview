@@ -9,6 +9,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.view.View;
 import com.jamesonli.accountview.R;
 import com.jamesonli.accountview.common.Constants;
+import com.jamesonli.accountview.core.AccountDataManager;
+import com.jamesonli.accountview.core.SharedPreferencesManager;
+import com.jamesonli.accountview.ui.form.LoginDialogFragment;
 import com.jamesonli.accountview.ui.graph.GraphFragment;
 import com.jamesonli.accountview.ui.summary.OverviewSummaryFragment;
 
@@ -24,6 +27,15 @@ public class OverviewActivity extends Activity implements GraphFragment.GraphFra
         setContentView(R.layout.activity_overview);
 
         initView();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if(!AccountDataManager.getInstance(getApplicationContext()).isLoggedIn()) {
+            showLoginDialog();
+        }
     }
 
     private void initView() {
@@ -46,6 +58,11 @@ public class OverviewActivity extends Activity implements GraphFragment.GraphFra
     private void switchFullFragment(Fragment fragment, int container) {
         FragmentManager manager = getFragmentManager();
         manager.beginTransaction().replace(container, fragment).commit();
+    }
+
+    private void showLoginDialog() {
+        LoginDialogFragment loginDialog = LoginDialogFragment.getInstance(this);
+        loginDialog.show(getFragmentManager(), "loginDialog");
     }
 
     @Override
