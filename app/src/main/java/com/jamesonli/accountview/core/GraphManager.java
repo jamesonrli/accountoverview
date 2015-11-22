@@ -16,7 +16,6 @@ import java.util.List;
 public class GraphManager {
 
     /**
-     * Application context is recommended.
      * Passing a weak referenced listener is recommended.
      */
     public static void getAccountOverviewData(final Context context, final GraphDataListener listener) {
