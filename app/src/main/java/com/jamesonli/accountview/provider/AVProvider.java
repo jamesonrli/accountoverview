@@ -10,7 +10,7 @@ import android.net.Uri;
 /**
  * Created by james on 11/23/15.
  */
-public class AccountViewProvider extends ContentProvider {
+public class AVProvider extends ContentProvider {
 
     private DbManager mDbManager;
     private SQLiteDatabase mReadableDB;
