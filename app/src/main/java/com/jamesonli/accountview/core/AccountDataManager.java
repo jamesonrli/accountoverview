@@ -1,13 +1,13 @@
 package com.jamesonli.accountview.core;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.jamesonli.accountview.common.AVUtils;
-import com.jamesonli.accountview.db.DbConstants;
-import com.jamesonli.accountview.db.DbManager;
+import com.jamesonli.accountview.provider.AVContract;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -22,10 +22,10 @@ public class AccountDataManager {
     private static final Logger LOG = LoggerFactory.getLogger(AccountDataManager.class);
     private static AccountDataManager mDataManager;
 
-    private final DbManager mDbManager;
     private final Executor mAccountManagerExecutor;
     private final SharedPreferencesManager mPrefManager;
     private final Context mContext;
+    private final ContentResolver mContentResolver;
 
     /**
      * Get an instance of AccountDataManager
@@ -39,10 +39,10 @@ public class AccountDataManager {
     }
 
     private AccountDataManager(Context context) {
-        mDbManager = DbManager.getInstance(context);
         mAccountManagerExecutor = Executors.newSingleThreadExecutor();
         mPrefManager = SharedPreferencesManager.getInstance(context);
         mContext = context;
+        mContentResolver = context.getContentResolver();
     }
 
     public boolean isLoggedIn() {
@@ -101,10 +101,10 @@ public class AccountDataManager {
             @Override
             public void run() {
                 ContentValues value = new ContentValues();
-                value.put(DbConstants.BALANCE_TABLE_DATE, date.getTime());
-                value.put(DbConstants.BALANCE_TABLE_BAL, balance);
+                value.put(AVContract.BALANCE_TABLE_DATE, date.getTime());
+                value.put(AVContract.BALANCE_TABLE_BALANCE, balance);
 
-                mDbManager.getWritableDatabase().insert(DbConstants.BALANCE_TABLE, null, value);
+                mContentResolver.insert(AVContract.BALANCE_DATA_URI, value);
 
                 listener.onComplete();
             }
@@ -150,9 +150,9 @@ public class AccountDataManager {
         Runnable qryTask = new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = mDbManager.getReadableDatabase().query(
-                        DbConstants.BALANCE_TABLE, null, null, null, null, null,
-                        DbConstants.BALANCE_TABLE_DATE + " asc");
+                Cursor cursor = mContentResolver.query(
+                        AVContract.BALANCE_DATA_URI, null, null, null,
+                        AVContract.BALANCE_TABLE_DATE + " asc");
                 listener.onResult(cursor);
             }
         };

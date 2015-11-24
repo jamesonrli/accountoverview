@@ -1,17 +1,21 @@
-package com.jamesonli.accountview.db;
+package com.jamesonli.accountview.provider;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-public class DbManager {
+class DbManager {
 
     private static DbManager mManager;
 
     private AccountDataDbHelper mDbHelper;
 
-    public static DbManager getInstance(Context context) {
+    static void init(Context context) {
+        mManager = new DbManager(context);
+    }
+
+    static DbManager getInstance(Context context) {
         if(mManager == null) {
-            mManager = new DbManager(context);
+            init(context);
         }
 
         return mManager;
@@ -21,11 +25,11 @@ public class DbManager {
         mDbHelper = new AccountDataDbHelper(context);
     }
 
-    public SQLiteDatabase getReadableDatabase() {
+    SQLiteDatabase getReadableDatabase() {
         return mDbHelper.getReadableDatabase();
     }
 
-    public SQLiteDatabase getWritableDatabase() {
+    SQLiteDatabase getWritableDatabase() {
         return mDbHelper.getWritableDatabase();
     }
 

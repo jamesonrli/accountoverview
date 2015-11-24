@@ -8,7 +8,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.jamesonli.accountview.R;
 import com.jamesonli.accountview.common.AVUtils;
-import com.jamesonli.accountview.db.DbConstants;
+import com.jamesonli.accountview.provider.AVContract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,8 @@ public class GraphManager {
                 int index = 0;
 
                 while (cursor.moveToNext()) {
-                    vals.add(new Entry(cursor.getFloat(cursor.getColumnIndexOrThrow(DbConstants.BALANCE_TABLE_BAL)), index++));
-                    xVals.add(AVUtils.dateGraphLabelParser(cursor.getLong(cursor.getColumnIndexOrThrow(DbConstants.BALANCE_TABLE_DATE))));
+                    vals.add(new Entry(cursor.getFloat(cursor.getColumnIndexOrThrow(AVContract.BALANCE_TABLE_BALANCE)), index++));
+                    xVals.add(AVUtils.dateGraphLabelParser(cursor.getLong(cursor.getColumnIndexOrThrow(AVContract.BALANCE_TABLE_DATE))));
                 }
 
                 LineDataSet dataSet = new LineDataSet(vals, context.getString(R.string.graph_balance_label));

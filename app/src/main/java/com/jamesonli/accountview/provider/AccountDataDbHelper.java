@@ -1,12 +1,12 @@
-package com.jamesonli.accountview.db;
+package com.jamesonli.accountview.provider;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class AccountDataDbHelper extends SQLiteOpenHelper {
+class AccountDataDbHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "accountview.db";
 
     public AccountDataDbHelper(Context context) {
@@ -20,6 +20,7 @@ public class AccountDataDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL(DbConstants.SQL_DROP_BALANCE_OLD);
+        db.execSQL(DbConstants.SQL_CREATE_BALANCE);
     }
 }
