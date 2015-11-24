@@ -49,7 +49,11 @@ public class AccountViewProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        return null;
+        if(mUriMatcher.match(uri) == BALANCE_URI_MATCH) {
+            return AVContract.TYPE_BALANCE_LIST;
+        }
+
+        throw new IllegalArgumentException("Unsupported URI: " + uri);
     }
 
     @Override

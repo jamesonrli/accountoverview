@@ -11,6 +11,10 @@ public final class AVContract {
     public static final String BALANCE_DATA_URL = URL + "/" + DbConstants.BALANCE_TABLE;
     public static final Uri BALANCE_DATA_URI = Uri.parse(BALANCE_DATA_URL);
 
+    /** Types **/
+    public static final String TYPE_DIR = "vnd.android.cursor.dir";
+    public static final String TYPE_BALANCE_LIST = TYPE_DIR + "/vnd.jamesonli." + DbConstants.BALANCE_TABLE;
+
     /** Balances **/
     public static final String BALANCE_TABLE = DbConstants.BALANCE_TABLE;
     public static final String BALANCE_TABLE_KEY = DbConstants.BALANCE_TABLE_PK;
