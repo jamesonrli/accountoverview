@@ -13,7 +13,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.jamesonli.accountview.R;
 import com.jamesonli.accountview.core.GraphDataListener;
-import com.jamesonli.accountview.core.GraphManager;
+import com.jamesonli.accountview.core.GraphDataManager;
 
 import java.lang.ref.WeakReference;
 
@@ -59,7 +59,7 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
     }
 
     public void notifyGraphDataChange() {
-        GraphManager.getAccountOverviewData(getActivity().getApplicationContext(), new GraphDataResultListener(this));
+        GraphDataManager.getAccountOverviewData(getActivity().getApplicationContext(), new GraphDataResultListener(this));
     }
 
     public void updateGraphData(final LineData data) {

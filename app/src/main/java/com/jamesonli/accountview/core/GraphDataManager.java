@@ -13,7 +13,7 @@ import com.jamesonli.accountview.provider.AVContract;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GraphManager {
+public class GraphDataManager {
 
     /**
      * Passing a weak referenced listener is recommended.

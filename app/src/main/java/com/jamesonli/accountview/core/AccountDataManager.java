@@ -3,11 +3,13 @@ package com.jamesonli.accountview.core;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.jamesonli.accountview.common.AVUtils;
 import com.jamesonli.accountview.provider.AVContract;
+import com.jamesonli.accountview.service.AVService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -23,7 +25,6 @@ public class AccountDataManager {
     private static AccountDataManager mDataManager;
 
     private final Executor mAccountManagerExecutor;
-    private final SharedPreferencesManager mPrefManager;
     private final Context mContext;
     private final ContentResolver mContentResolver;
 
@@ -40,60 +41,8 @@ public class AccountDataManager {
 
     private AccountDataManager(Context context) {
         mAccountManagerExecutor = Executors.newSingleThreadExecutor();
-        mPrefManager = SharedPreferencesManager.getInstance(context);
         mContext = context;
         mContentResolver = context.getContentResolver();
-    }
-
-    public boolean isLoggedIn() {
-        return SharedPreferencesManager.getInstance(mContext).valueExists(SharedPreferencesManager.USER_ID);
-    }
-
-    /**
-     * Get device id, make login request, and store user id
-     */
-    public void login(AuthListener listener) {
-        String deviceId = AVUtils.getDeviceId(mContext);
-
-        JSONObject userObj = new JSONObject();
-        JSONObject deviceObj = new JSONObject();
-        try {
-            deviceObj.put("deviceid", deviceId);
-            userObj.put("user", deviceObj);
-
-            loginRequest(userObj, listener);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loginRequest(JSONObject userObj, final AuthListener listener) {
-        NetworkManager.getInstance(mContext).newJsonRequest(NetworkManager.POST, NetworkManager.USERS, userObj.toString(),
-                new Response.Listener() {
-                    @Override
-                    public void onResponse(Object response) {
-                        if (response instanceof JSONObject) {
-                            JSONObject responseObj = (JSONObject) response;
-                            try {
-                                persistUserId(responseObj.getString("id"));
-                                listener.onLoginSuccess();
-                            } catch (JSONException e) {
-                                LOG.error("failed to parse response json: " + e.getMessage());
-                            }
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        LOG.error("network error: " + error.getMessage());
-                    }
-                }
-        );
-    }
-
-    private void persistUserId(String userId) {
-        mPrefManager.setString(SharedPreferencesManager.USER_ID, userId);
     }
 
     public void addBalanceEntry(final Date date, final float balance, final AccountDataListener listener) {
@@ -125,7 +74,6 @@ public class AccountDataManager {
         } catch (JSONException e) {
             LOG.error("failed to create json obj: " + e.getMessage());
         }
-
 
     }
 

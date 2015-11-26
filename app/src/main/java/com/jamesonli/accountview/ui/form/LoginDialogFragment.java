@@ -11,6 +11,7 @@ import android.widget.Button;
 import com.jamesonli.accountview.R;
 import com.jamesonli.accountview.core.AccountDataManager;
 import com.jamesonli.accountview.core.AuthListener;
+import com.jamesonli.accountview.core.AuthManager;
 
 /**
  * Created by james on 11/21/15.
@@ -52,7 +53,7 @@ public class LoginDialogFragment extends DialogFragment {
         }
         @Override
         public void onClick(View view) {
-            AccountDataManager.getInstance(view.getContext()).login(new AuthListener() {
+            AuthManager.getInstance(view.getContext()).login(new AuthListener() {
                 @Override
                 public void onLoginSuccess() {
                     mFrag.dismiss();
