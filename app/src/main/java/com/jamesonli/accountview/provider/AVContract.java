@@ -16,6 +16,8 @@ public final class AVContract {
     public static final String TYPE_BALANCE_LIST = TYPE_DIR + "/vnd.jamesonli." + DbConstants.BALANCE_TABLE;
 
     /** Balances **/
+    public static final int BALANCE_INSERT_OP = 0xba3;
+    public static final int BALANCE_DOWNLOAD_OP = 0xba4;
     public static final String BALANCE_TABLE = DbConstants.BALANCE_TABLE;
     public static final String BALANCE_TABLE_KEY = DbConstants.BALANCE_TABLE_PK;
     public static final String BALANCE_TABLE_DATE = DbConstants.BALANCE_TABLE_DATE;

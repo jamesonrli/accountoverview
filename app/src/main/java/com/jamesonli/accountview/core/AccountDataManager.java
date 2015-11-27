@@ -3,13 +3,11 @@ package com.jamesonli.accountview.core;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.jamesonli.accountview.common.AVUtils;
 import com.jamesonli.accountview.provider.AVContract;
-import com.jamesonli.accountview.service.AVService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -45,7 +43,7 @@ public class AccountDataManager {
         mContentResolver = context.getContentResolver();
     }
 
-    public void addBalanceEntry(final Date date, final float balance, final AccountDataListener listener) {
+    public void addBalanceEntry(final Date date, final float balance) {
         Runnable dbTask = new Runnable() {
             @Override
             public void run() {
@@ -54,44 +52,9 @@ public class AccountDataManager {
                 value.put(AVContract.BALANCE_TABLE_BALANCE, balance);
 
                 mContentResolver.insert(AVContract.BALANCE_DATA_URI, value);
-
-                listener.onComplete();
             }
         };
         mAccountManagerExecutor.execute(dbTask);
-
-        String deviceId = AVUtils.getDeviceId(mContext);
-
-        try {
-            JSONObject balanceDetails = new JSONObject();
-            balanceDetails.put("deviceid", deviceId);
-            balanceDetails.put("datetime", date.getTime());
-            balanceDetails.put("balance", balance);
-            JSONObject balanceObj = new JSONObject();
-            balanceObj.put("balance", balanceDetails);
-
-            addBalanceRequest(balanceObj);
-        } catch (JSONException e) {
-            LOG.error("failed to create json obj: " + e.getMessage());
-        }
-
-    }
-
-    private void addBalanceRequest(JSONObject balanceObj) {
-        NetworkManager.getInstance(mContext).newJsonRequest(NetworkManager.POST, NetworkManager.BALANCES, balanceObj.toString(),
-                new Response.Listener() {
-                    @Override
-                    public void onResponse(Object response) {
-                        LOG.info("new balance sent");
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        LOG.error("new balance error: " + error.getMessage());
-                    }
-                }
-        );
     }
 
     public void getBalanceEntries(final AccountDataListener listener) {
@@ -107,4 +70,5 @@ public class AccountDataManager {
 
         mAccountManagerExecutor.execute(qryTask);
     }
+
 }

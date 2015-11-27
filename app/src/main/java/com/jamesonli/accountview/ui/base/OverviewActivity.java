@@ -4,13 +4,19 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.view.View;
 import com.jamesonli.accountview.R;
 import com.jamesonli.accountview.common.Constants;
 import com.jamesonli.accountview.core.AccountDataManager;
+import com.jamesonli.accountview.core.AuthManager;
 import com.jamesonli.accountview.core.SharedPreferencesManager;
+import com.jamesonli.accountview.provider.AVContract;
 import com.jamesonli.accountview.ui.form.LoginDialogFragment;
 import com.jamesonli.accountview.ui.graph.GraphFragment;
 import com.jamesonli.accountview.ui.summary.OverviewSummaryFragment;
@@ -20,6 +26,24 @@ public class OverviewActivity extends Activity implements GraphFragment.GraphFra
     private FloatingActionButton mAddBalanceButton;
     private GraphFragment graphFragment;
     private OverviewSummaryFragment summaryFragment;
+    private Handler uiHandler = new Handler();
+
+    private final ContentObserver balanceDataObserver = new ContentObserver(uiHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            this.onChange(selfChange, null);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+
+            if(uri != null && uri.equals(AVContract.BALANCE_DATA_URI) && graphFragment != null) {
+                graphFragment.notifyGraphDataChange();
+
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +57,18 @@ public class OverviewActivity extends Activity implements GraphFragment.GraphFra
     protected void onResume() {
         super.onResume();
 
-        if(!AccountDataManager.getInstance(getApplicationContext()).isLoggedIn()) {
+        if(!AuthManager.getInstance(getApplicationContext()).isLoggedIn()) {
             showLoginDialog();
         }
+
+        getContentResolver().registerContentObserver(AVContract.BALANCE_DATA_URI, true, balanceDataObserver);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        getContentResolver().unregisterContentObserver(balanceDataObserver);
     }
 
     private void initView() {
@@ -47,7 +80,7 @@ public class OverviewActivity extends Activity implements GraphFragment.GraphFra
         mAddBalanceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivityForResult(new Intent(OverviewActivity.this, BalanceInputActivity.class), Constants.BALANCE_REQUEST);
+                startActivity(new Intent(OverviewActivity.this, BalanceInputActivity.class));
             }
         });
 
@@ -66,23 +99,9 @@ public class OverviewActivity extends Activity implements GraphFragment.GraphFra
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(resultCode != RESULT_OK) {
-            return;
-        }
-
-        switch(requestCode) {
-            case Constants.BALANCE_REQUEST:
-                graphFragment.notifyGraphDataChange();
-                break;
-        }
-    }
-
-    @Override
     public void updateSelectedValue(String date, float balance) {
         summaryFragment.setDate(date);
         summaryFragment.setBalance(balance);
     }
+
 }

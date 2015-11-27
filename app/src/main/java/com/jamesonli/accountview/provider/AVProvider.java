@@ -1,20 +1,20 @@
 package com.jamesonli.accountview.provider;
 
-import android.content.ContentProvider;
-import android.content.ContentValues;
-import android.content.UriMatcher;
+import android.content.*;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import com.jamesonli.accountview.service.BalanceService;
 
 /**
- * Created by james on 11/23/15.
+ * AVProvider runs on the calling thread
  */
 public class AVProvider extends ContentProvider {
 
     private DbManager mDbManager;
     private SQLiteDatabase mReadableDB;
     private SQLiteDatabase mWritableDB;
+    private Context mContext;
 
     private static final UriMatcher mUriMatcher;
     private static final int BALANCE_URI_MATCH = 1;
@@ -26,7 +26,8 @@ public class AVProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        mDbManager = DbManager.getInstance(getContext().getApplicationContext());
+        mContext = getContext().getApplicationContext();
+        mDbManager = DbManager.getInstance(mContext);
 
         if(mDbManager == null) {
             return false;
@@ -44,13 +45,24 @@ public class AVProvider extends ContentProvider {
             return null;
         }
 
-        return mReadableDB.query(DbConstants.BALANCE_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
+        int matchKey = mUriMatcher.match(uri);
+        switch(matchKey) {
+            case BALANCE_URI_MATCH: {
+                return mReadableDB.query(DbConstants.BALANCE_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
+            }
+            default:
+                return null;
+        }
     }
 
     @Override
     public String getType(Uri uri) {
-        if(mUriMatcher.match(uri) == BALANCE_URI_MATCH) {
-            return AVContract.TYPE_BALANCE_LIST;
+        int matchKey = mUriMatcher.match(uri);
+
+        switch(matchKey) {
+            case BALANCE_URI_MATCH: {
+                return AVContract.TYPE_BALANCE_LIST;
+            }
         }
 
         throw new IllegalArgumentException("Unsupported URI: " + uri);
@@ -65,26 +77,49 @@ public class AVProvider extends ContentProvider {
             return null;
         }
 
-        long insertResult = mWritableDB.insert(DbConstants.BALANCE_TABLE, null, values);
+        int matchKey = mUriMatcher.match(uri);
+        switch(matchKey) {
+            case BALANCE_URI_MATCH: {
+                long insertResult = mWritableDB.insert(DbConstants.BALANCE_TABLE, null, values);
 
-        return insertResult == -1 ? null : uri;
+                long dateVal = values.getAsLong(AVContract.BALANCE_TABLE_DATE);
+                float balVal = values.getAsFloat(AVContract.BALANCE_TABLE_BALANCE);
+
+                Intent serviceIntent = new Intent(mContext, BalanceService.class);
+                serviceIntent.addFlags(AVContract.BALANCE_INSERT_OP);
+                serviceIntent.putExtra(AVContract.BALANCE_TABLE_DATE, dateVal);
+                serviceIntent.putExtra(AVContract.BALANCE_TABLE_BALANCE, balVal);
+
+                mContext.startService(serviceIntent);
+
+                return insertResult == -1 ? null : uri;
+            }
+            default:
+                return null;
+        }
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        if(!mWritableDB.isOpen() || mUriMatcher.match(uri) != BALANCE_URI_MATCH) {
-            return 0;
-        }
+//        if(!mWritableDB.isOpen() || mUriMatcher.match(uri) != BALANCE_URI_MATCH) {
+//            return 0;
+//        }
+//
+//        return mWritableDB.delete(DbConstants.BALANCE_TABLE, selection, selectionArgs);
 
-        return mWritableDB.delete(DbConstants.BALANCE_TABLE, selection, selectionArgs);
+        // todo: not yet supported
+        return -1;
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        if(!mWritableDB.isOpen() || mUriMatcher.match(uri) != BALANCE_URI_MATCH) {
-            return 0;
-        }
+//        if(!mWritableDB.isOpen() || mUriMatcher.match(uri) != BALANCE_URI_MATCH) {
+//            return 0;
+//        }
+//
+//        return mWritableDB.update(DbConstants.BALANCE_TABLE, values, selection, selectionArgs);
 
-        return mWritableDB.update(DbConstants.BALANCE_TABLE, values, selection, selectionArgs);
+        // todo: not yet supported
+        return -1;
     }
 }

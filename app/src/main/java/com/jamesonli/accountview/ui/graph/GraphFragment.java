@@ -59,6 +59,7 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
     }
 
     public void notifyGraphDataChange() {
+        // todo: replace this with CursorAdapter
         GraphDataManager.getAccountOverviewData(getActivity().getApplicationContext(), new GraphDataResultListener(this));
     }
 

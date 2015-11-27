@@ -80,31 +80,11 @@ public class BalanceInputFragment extends Fragment {
             return;
         }
 
-        dataManager.addBalanceEntry(date, balanceVal, new BalanceSubmitListener(this));
+        dataManager.addBalanceEntry(date, balanceVal);
     }
 
     private void setListener(BalanceInputFormInteractionListener listener) {
         mListener = listener;
-    }
-
-    private static class BalanceSubmitListener implements AccountDataListener {
-        public WeakReference<BalanceInputFragment> balanceInputViewRef;
-
-        public BalanceSubmitListener(BalanceInputFragment view) {
-            balanceInputViewRef = new WeakReference<>(view);
-        }
-
-        @Override
-        public void onResult(Cursor cursor) {}
-
-        @Override
-        public void onComplete() {
-            final BalanceInputFragment view = balanceInputViewRef.get();
-
-            if(view != null) {
-                view.mListener.onFormSubmit();
-            }
-        }
     }
 
     public interface BalanceInputFormInteractionListener {

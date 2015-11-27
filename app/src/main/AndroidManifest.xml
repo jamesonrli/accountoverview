@@ -28,6 +28,8 @@
             android:authorities="com.jamesonli.accountview.provider"
             android:name="com.jamesonli.accountview.provider.AVProvider"
             android:permission="com.jamesonli.accountview.permission.RDWR"/>
+
+        <service android:name=".service.BalanceService" />
     </application>
     
 </manifest>
