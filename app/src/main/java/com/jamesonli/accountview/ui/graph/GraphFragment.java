@@ -1,7 +1,10 @@
 package com.jamesonli.accountview.ui.graph;
 
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +17,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.jamesonli.accountview.R;
 import com.jamesonli.accountview.core.GraphDataListener;
 import com.jamesonli.accountview.core.GraphDataManager;
+import com.jamesonli.accountview.provider.AVContract;
 
 import java.lang.ref.WeakReference;
 
@@ -21,6 +25,7 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
 
     private LineData lineData;
     private LineChart lineChart;
+    private Handler uiHandler = new Handler();
 
     private GraphFragmentInteraction mListener;
 
@@ -31,6 +36,22 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
     }
 
     public GraphFragment() {}
+
+    private final ContentObserver balanceDataObserver = new ContentObserver(uiHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            this.onChange(selfChange, null);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+
+            if(uri != null && uri.equals(AVContract.BALANCE_DATA_URI)) {
+                notifyGraphDataChange();
+            }
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,8 +79,19 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
         notifyGraphDataChange();
     }
 
-    public void notifyGraphDataChange() {
-        // todo: replace this with CursorAdapter
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().getContentResolver().registerContentObserver(AVContract.BALANCE_DATA_URI, true, balanceDataObserver);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().getContentResolver().unregisterContentObserver(balanceDataObserver);
+    }
+
+    private void notifyGraphDataChange() {
         GraphDataManager.getAccountOverviewData(getActivity().getApplicationContext(), new GraphDataResultListener(this));
     }
 
@@ -69,15 +101,11 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
             public void run() {
                 lineData = data;
                 if(lineChart != null) {
-                    updateChart();
+                    lineChart.setData(lineData);
+                    lineChart.invalidate(); // refresh
                 }
             }
         });
-    }
-
-    private void updateChart() {
-        lineChart.setData(lineData);
-        lineChart.invalidate(); // refresh
     }
 
     private static class GraphDataResultListener implements GraphDataListener {

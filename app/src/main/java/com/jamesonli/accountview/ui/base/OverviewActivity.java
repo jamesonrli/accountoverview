@@ -26,24 +26,6 @@ public class OverviewActivity extends Activity implements GraphFragment.GraphFra
     private FloatingActionButton mAddBalanceButton;
     private GraphFragment graphFragment;
     private OverviewSummaryFragment summaryFragment;
-    private Handler uiHandler = new Handler();
-
-    private final ContentObserver balanceDataObserver = new ContentObserver(uiHandler) {
-        @Override
-        public void onChange(boolean selfChange) {
-            this.onChange(selfChange, null);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            super.onChange(selfChange, uri);
-
-            if(uri != null && uri.equals(AVContract.BALANCE_DATA_URI) && graphFragment != null) {
-                graphFragment.notifyGraphDataChange();
-
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,15 +42,6 @@ public class OverviewActivity extends Activity implements GraphFragment.GraphFra
         if(!AuthManager.getInstance(getApplicationContext()).isLoggedIn()) {
             showLoginDialog();
         }
-
-        getContentResolver().registerContentObserver(AVContract.BALANCE_DATA_URI, true, balanceDataObserver);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        getContentResolver().unregisterContentObserver(balanceDataObserver);
     }
 
     private void initView() {
