@@ -81,6 +81,7 @@ public class AVProvider extends ContentProvider {
         switch(matchKey) {
             case BALANCE_URI_MATCH: {
                 long insertResult = mWritableDB.insert(DbConstants.BALANCE_TABLE, null, values);
+                mContext.getContentResolver().notifyChange(AVContract.BALANCE_DATA_URI, null);
 
                 long dateVal = values.getAsLong(AVContract.BALANCE_TABLE_DATE);
                 float balVal = values.getAsFloat(AVContract.BALANCE_TABLE_BALANCE);

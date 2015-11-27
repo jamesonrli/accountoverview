@@ -81,6 +81,7 @@ public class BalanceInputFragment extends Fragment {
         }
 
         dataManager.addBalanceEntry(date, balanceVal);
+        mListener.onFormSubmit();
     }
 
     private void setListener(BalanceInputFormInteractionListener listener) {

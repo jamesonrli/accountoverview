@@ -45,13 +45,17 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            super.onChange(selfChange, uri);
-
             if(uri != null && uri.equals(AVContract.BALANCE_DATA_URI)) {
                 notifyGraphDataChange();
             }
         }
     };
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getActivity().getContentResolver().registerContentObserver(AVContract.BALANCE_DATA_URI, true, balanceDataObserver);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -80,14 +84,8 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        getActivity().getContentResolver().registerContentObserver(AVContract.BALANCE_DATA_URI, true, balanceDataObserver);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroy() {
+        super.onDestroy();
         getActivity().getContentResolver().unregisterContentObserver(balanceDataObserver);
     }
 
