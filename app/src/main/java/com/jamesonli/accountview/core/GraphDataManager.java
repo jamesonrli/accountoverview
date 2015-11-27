@@ -36,9 +36,6 @@ public class GraphDataManager {
 
                 listener.updateGraphData(new LineData(xVals, dataSet));
             }
-
-            @Override
-            public void onComplete() {}
         });
     }
 
