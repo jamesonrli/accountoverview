@@ -48,7 +48,9 @@ public class AVProvider extends ContentProvider {
         int matchKey = mUriMatcher.match(uri);
         switch(matchKey) {
             case BALANCE_URI_MATCH: {
-                return mReadableDB.query(DbConstants.BALANCE_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
+                Cursor balanceCursor = mReadableDB.query(DbConstants.BALANCE_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
+                balanceCursor.setNotificationUri(mContext.getContentResolver(), AVContract.BALANCE_DATA_URI);
+                return balanceCursor;
             }
             default:
                 return null;
@@ -123,4 +125,5 @@ public class AVProvider extends ContentProvider {
         // todo: not yet supported
         return -1;
     }
+
 }

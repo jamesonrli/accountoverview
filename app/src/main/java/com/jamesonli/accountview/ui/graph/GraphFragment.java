@@ -1,10 +1,10 @@
 package com.jamesonli.accountview.ui.graph;
 
-import android.database.ContentObserver;
-import android.net.Uri;
+import android.app.LoaderManager;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,17 +15,15 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.jamesonli.accountview.R;
-import com.jamesonli.accountview.core.GraphDataListener;
-import com.jamesonli.accountview.core.GraphDataManager;
-import com.jamesonli.accountview.provider.AVContract;
+import com.jamesonli.accountview.core.AccountDataManager;
+import com.jamesonli.accountview.common.GraphDataUtils;
 
-import java.lang.ref.WeakReference;
+public class GraphFragment extends Fragment implements OnChartValueSelectedListener, LoaderManager.LoaderCallbacks<Cursor> {
 
-public class GraphFragment extends Fragment implements GraphDataListener, OnChartValueSelectedListener {
+    private static final int GRAPH_DATA_LOADER_ID = 0;
 
     private LineData lineData;
     private LineChart lineChart;
-    private Handler uiHandler = new Handler();
 
     private GraphFragmentInteraction mListener;
 
@@ -35,26 +33,7 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
         return fragment;
     }
 
-    public GraphFragment() {}
-
-    private final ContentObserver balanceDataObserver = new ContentObserver(uiHandler) {
-        @Override
-        public void onChange(boolean selfChange) {
-            this.onChange(selfChange, null);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            if(uri != null && uri.equals(AVContract.BALANCE_DATA_URI)) {
-                notifyGraphDataChange();
-            }
-        }
-    };
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getActivity().getContentResolver().registerContentObserver(AVContract.BALANCE_DATA_URI, true, balanceDataObserver);
+    public GraphFragment() {
     }
 
     @Override
@@ -79,48 +58,13 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
         lineChart.setAutoScaleMinMaxEnabled(true);
         lineChart.getLegend().setEnabled(false);
         lineChart.setOnChartValueSelectedListener(this);
-
-        notifyGraphDataChange();
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        getActivity().getContentResolver().unregisterContentObserver(balanceDataObserver);
-    }
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-    private void notifyGraphDataChange() {
-        GraphDataManager.getAccountOverviewData(getActivity().getApplicationContext(), new GraphDataResultListener(this));
-    }
-
-    public void updateGraphData(final LineData data) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                lineData = data;
-                if(lineChart != null) {
-                    lineChart.setData(lineData);
-                    lineChart.invalidate(); // refresh
-                }
-            }
-        });
-    }
-
-    private static class GraphDataResultListener implements GraphDataListener {
-        private WeakReference<GraphFragment> graphViewRef;
-
-        public GraphDataResultListener(GraphFragment view) {
-            graphViewRef = new WeakReference<>(view);
-        }
-
-        @Override
-        public void updateGraphData(LineData data) {
-            GraphFragment graphFragment = graphViewRef.get();
-
-            if(graphFragment != null && graphFragment.isAdded()) {
-                graphFragment.updateGraphData(data);
-            }
-        }
+        getLoaderManager().initLoader(GRAPH_DATA_LOADER_ID, null, this);
     }
 
     @Override
@@ -129,7 +73,8 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
     }
 
     @Override
-    public void onNothingSelected() {}
+    public void onNothingSelected() {
+    }
 
     public void setInteractionListener(GraphFragmentInteraction listener) {
         mListener = listener;
@@ -138,4 +83,33 @@ public class GraphFragment extends Fragment implements GraphDataListener, OnChar
     public interface GraphFragmentInteraction {
         void updateSelectedValue(String date, float balance);
     }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case GRAPH_DATA_LOADER_ID:
+                return AccountDataManager.getBalanceEntriesCursorLoader(getActivity().getApplicationContext());
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        updateGraphData(GraphDataUtils.getAccountOverviewData(getActivity(), data));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // no action
+    }
+
+    private void updateGraphData(final LineData data) {
+        lineData = data;
+        if (lineChart != null) {
+            lineChart.setData(lineData);
+            lineChart.invalidate();
+        }
+    }
+
 }

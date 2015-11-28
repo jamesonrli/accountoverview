@@ -6,13 +6,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.jamesonli.accountview.common.AVUtils;
 import com.jamesonli.accountview.core.NetworkManager;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Date;
-
 
 /**
  * Created by james on 11/26/15.

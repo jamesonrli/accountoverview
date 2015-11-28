@@ -3,6 +3,7 @@ package com.jamesonli.accountview.core;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.database.Cursor;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -57,18 +58,9 @@ public class AccountDataManager {
         mAccountManagerExecutor.execute(dbTask);
     }
 
-    public void getBalanceEntries(final AccountDataListener listener) {
-        Runnable qryTask = new Runnable() {
-            @Override
-            public void run() {
-                Cursor cursor = mContentResolver.query(
-                        AVContract.BALANCE_DATA_URI, null, null, null,
-                        AVContract.BALANCE_TABLE_DATE + " asc");
-                listener.onResult(cursor);
-            }
-        };
-
-        mAccountManagerExecutor.execute(qryTask);
+    public static CursorLoader getBalanceEntriesCursorLoader(Context context) {
+        return new CursorLoader(context, AVContract.BALANCE_DATA_URI,
+                null, null, null, AVContract.BALANCE_TABLE_DATE + " asc");
     }
 
 }

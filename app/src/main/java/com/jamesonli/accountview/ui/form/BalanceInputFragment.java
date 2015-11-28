@@ -1,7 +1,6 @@
 package com.jamesonli.accountview.ui.form;
 
 import android.app.Fragment;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,10 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.jamesonli.accountview.R;
-import com.jamesonli.accountview.core.AccountDataListener;
 import com.jamesonli.accountview.core.AccountDataManager;
 
-import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
